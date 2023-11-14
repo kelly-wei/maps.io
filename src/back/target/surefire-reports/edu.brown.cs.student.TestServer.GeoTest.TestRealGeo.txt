@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: edu.brown.cs.student.TestServer.GeoTest.TestRealGeo
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.27 s - in edu.brown.cs.student.TestServer.GeoTest.TestRealGeo
