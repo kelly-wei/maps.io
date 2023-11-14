@@ -1,70 +1,97 @@
-# Getting Started with Create React App
+## Project Details
+Project Name: Maps
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Project Description: 
+The Maps project tasks us to work with a fictional stakeholder, a real estate appraiser. It incorporates many elements from previous sprints (CSV, Server, Mock and REPL) as the end-user is able to submit commands through a REPL. Some of these commands require API calls so that the end-user can load, view, and search a CSV file.
 
-## Available Scripts
+Team Member(s): 
+- Karis Ma (jma78): spent 16 hours
+- Kelly Wei (kwei8): spent 16 hours
 
-In the project directory, you can run:
+GitHub Repo: https://github.com/cs0320-f23/maps-jma78-kwei8.git
 
-### `npm start`
+## Design Choices
+The Maps project is split into two packages:
+### 1. back
+#### Server
+This package hosts the Server class where there are the following different endpoints:
+- <u>/load<u> which loads a CSV file given a pathway
+- <u>/search<u> which searches within a loaded CSV file given a keyword and/or a column identifier
+- <u>/view<u> which displays the CSV data 
+- <u>/broadband<u> which retrieves the broadband data from an API
+- <u>/filter_area<u> which retrieves the parsed geoJSON that has relevant data related to the keyword passed in
+- <u>/geojson<u> which retrieves the geoJSON
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Every Handler returns a Map that contains the requested data or a helpful error message if the data cannot be retrieved. There are three custom exceptions that can be thrown: 
+- BadJSONException means there was trouble parsing to/from a Json object, 
+- BadRequestException means there was an issue with the user input, and 
+- DataSourceException means there was an issue with querying into the Census API. 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+BroadBandHandler gets data from CensusDatasource, which implements BroadbandDatasource interface. CensusDatasource makes call the Census API and gets the broadband percentage. If there was an issue with the input or retrieving data form the Census API, it returns custom errors.
 
-### `npm test`
+#### Parsing
+This package also hosts a Parsing folder where the Parser class parses a CSV and ProcessedFile contains all the information about the CSV, including rows and headers. 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### Searching
+This packing hosts the Searching folder. SearcherAll and SearcherIdentifier implement the Searcher interface; SearcherAll searches all rows while SearcherIdentifier searches if the user inputs a header.
 
-### `npm run build`
+#### Caching
+Results for user story 3 are cached using Guava, with a size-based cache that takes an argument corresponding to the maximum cache size. The cache is related to the datasource through the proxy pattern, such that the raw datasource can be accessed alone but is ordinarily wrapped by the cache.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. map
+Within the map package, you'll find the front-end implementation of our project. Breaking down the components:
+- map: This folder hosts the MapBox and overlay information to properly display the graphics for the site
+- Mocking: This folder hosts the information to mock data 
+- REPL
+    - REPL Function: Hosts functions related to the REPL that makes calls to the backend to complete through AccessBackend
+        - BroadBandFunc
+        - FilterGeoJSONFunc
+        - LoadFunc
+        - SearchFunc
+        - ViewFunch
+    - Controlled Input: represents the type of input passed through the input box
+    - Input: handles the commands passed in and hosts the REPL History
+    - REPL: represents the div hosting both Input and MapBox
+    - REPL History: handles keeping track of the user's history and displaying it in a table
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+For the user's convienence, we pre-loaded the previous ACS_Survey data so it's overlayed using data points. By clicking on the data points, the user is also able to see the name of the area and the median household income for that area. 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Our front-end kept accessibility in mind by using the following strategies:
+- Keyboard shortcuts: The user is able to use the following to engage with our app:
+        - 'Enter' key - used to submit queries within the input command box,
+        - 'Tab' key - used to page through the page, and
+        - 'Arrow Up'/'Arrow Down' key - used to navigate the history by mimicking a mouse scrolling.
+        - 'Equal' key - used to toggle the Show Commands buttons to view the valid commands.
+- Aria-labels and aria-live: If using a screen reader, all elements of our page has attached aria-labels so that the user knows where they are currently at on the page. The aria-live will provide updates as the information comes and populates in.
+- TabIndex: This ensures that a user can navigate through the page without having to use a mouse or trackpad.
 
-### `npm run eject`
+## Errors/Bugs
+There were no errors at this time.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Tests
+Our integration tests all new functionality not previously implemented in previous sprints using both mocked and real data, include state changes. Additionally, we had tests to ensure persistence to satisfy user story 4. Furthermore, we had unit tests on our functions that filtered and random tests on bounding boxes. These began with fuzz testing and broadening to property-based testing that verified accuracy.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+We also used Jest and Playwright to make sure the front-end was properly displaying the rendering of commands. 
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## How to...
+To view the map, direct yourself into the map directory and run 'npm start' and open the back end using the pom.xml file to configure and start the Server class. 
 
-## Learn More
+To run tests, please run mvn test 
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## SRC Reflection
+Your finished Maps product is built using many systems: programming languages, development environments, software packages, hardware, etc. Whose labor do you rely on when you run your capstone demo? Enumerate at least 12 different packages, tools, hardware components, etc. that you implicitly or explicitly used during this week’s work. 
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For us to have a successfuly product, we rely on the indivdiuals who contributed to the ideation, product development, and maintenance of the following tools, frameworks, and packages:
+1) React, Javascript, Java, TypeScript, HTML/CSS, and any coding languages that the listed depend on
+2) Google's Guava caching package
+3) Maven
+4) Playwright and Jest
+5) JUnit Testing Framework
+6) IDEs (i.e. Intellij and VSCode)
+7) Web browsers to view our React apps on (i.e. Safari, Google Chrome)
+8) Existing datasets (i.e. ACS_Survey)
+9) Mapbox
+10) Github
+11) Compiler(s) used 
+12) Underlying hardware of our computers (i.e. CPUs, chips, etc.)
